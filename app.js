@@ -1,4 +1,4 @@
-require('newrelic');
+require("newrelic");
 
 const createError = require("http-errors");
 const express = require("express");
