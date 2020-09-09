@@ -60,16 +60,40 @@ router.post('/message/:id/send', async (req, res) => {
 
 router.post('/message', auth, async (req, res) => {
 	try {
-		const { email: userEmail } = req.userProfile;
 		const { phoneNumber, defaultText } = req.body;
 
 		const createdMessage = await Message.create({
-			UserEmail: userEmail,
+			UserEmail: req.userProfile.email,
 			phoneNumber,
 			defaultText,
 		});
 
 		res.status(201).json(createdMessage);
+	} catch (error) {
+		console.log(error);
+		res.status(500).send(error.message);
+	}
+});
+
+router.put('/message/:id', auth, async (req, res) => {
+	try {
+		const { phoneNumber, defaultText } = req.body;
+		const [_, updatedMessage] = await Message.update(
+			{
+				phoneNumber,
+				defaultText,
+			},
+			{
+				where: {
+					id: req.params.id,
+					UserEmail: req.userProfile.email,
+				},
+				returning: true,
+				plain: true,
+			}
+		);
+
+		res.status(200).json(updatedMessage);
 	} catch (error) {
 		console.log(error);
 		res.status(500).send(error.message);
