@@ -12,6 +12,26 @@ const client = require('twilio')(
 
 const auth = require('../middleware/auth');
 
+router.delete('/message/:id', auth, async (req, res) => {
+	try {
+		const id = req.params.id;
+
+		const message = await Message.findByPk(id, {
+			where: { UserEmail: req.userProfile.email },
+		});
+
+		if (message) {
+			await message.destroy();
+		} else {
+			throw new Error('Message Not Found');
+		}
+		res.status(200).send('Message Deleted');
+	} catch (error) {
+		console.log(error);
+		res.status(500).send(error.message);
+	}
+});
+
 router.post('/message/:id/send', async (req, res) => {
 	try {
 		const id = req.params.id;
@@ -43,13 +63,13 @@ router.post('/message', auth, async (req, res) => {
 		const { email: userEmail } = req.userProfile;
 		const { phoneNumber, defaultText } = req.body;
 
-		await Message.create({
+		const createdMessage = await Message.create({
 			UserEmail: userEmail,
 			phoneNumber,
 			defaultText,
 		});
 
-		res.status(201).send();
+		res.status(201).json(createdMessage);
 	} catch (error) {
 		console.log(error);
 		res.status(500).send(error.message);
