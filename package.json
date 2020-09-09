@@ -3,7 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon ./bin/www"
+    "start": "nodemon ./bin/www",
+    "migrate": "node_modules/.bin/sequelize db:migrate",
+    "migrate:undo": "node_modules/.bin/sequelize db:migrate:undo"
   },
   "dependencies": {
     "auth0": "^2.28.0",
@@ -17,9 +19,15 @@
     "http-errors": "~1.6.3",
     "jade": "~1.11.0",
     "jwks-rsa": "^1.9.0",
+    "lodash": "^4.17.20",
     "morgan": "~1.9.1",
     "newrelic": "^6.13.0",
     "nodemon": "^2.0.4",
+    "pg": "^8.3.3",
+    "pg-hstore": "^2.3.3",
+    "sequelize": "^6.3.5",
+    "sequelize-cli": "^6.2.0",
     "twilio": "^3.49.1"
-  }
+  },
+  "devDependencies": {}
 }

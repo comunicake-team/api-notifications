@@ -1,5 +1,9 @@
 const express = require('express');
 const router = express.Router();
+const { sequelize } = require('../models');
+const {
+	models: { User, Message },
+} = sequelize;
 
 const client = require('twilio')(
 	process.env.TWILIO_ACCOUNT_SID,
@@ -8,21 +12,62 @@ const client = require('twilio')(
 
 const auth = require('../middleware/auth');
 
-router.post('/:id/send-text', auth, async (req, res) => {
+router.post('/message/:id/send', async (req, res) => {
 	try {
-		console.log('------------------------------------');
-		console.log(req.userProfile);
-		console.log('------------------------------------');
-		// await client.messages.create({
-		//   body: "Hey Dan",
-		//   from: "+12029533907",
-		//   to: "+15415137352",
-		// });
+		const id = req.params.id;
+		const message = await Message.findByPk(id);
 
-		res.send('Message sent');
+		if (message) {
+			console.log(
+				`Message "${req.body.message || message.defaultText}" sent to ${
+					message.phoneNumber
+				}`
+			);
+			// await client.messages.create({
+			//   body: "Hey Dan",
+			//   from: "+12029533907",
+			//   to: "+15415137352",
+			// });
+			res.send('Message sent');
+		} else {
+			throw new Error('Message Not Found');
+		}
 	} catch (error) {
 		console.log(error);
-		res.status(500).send();
+		res.status(500).send(error.message);
+	}
+});
+
+router.post('/message', auth, async (req, res) => {
+	try {
+		const { email: userEmail } = req.userProfile;
+		const { phoneNumber, defaultText } = req.body;
+
+		await Message.create({
+			UserEmail: userEmail,
+			phoneNumber,
+			defaultText,
+		});
+
+		res.status(201).send();
+	} catch (error) {
+		console.log(error);
+		res.status(500).send(error.message);
+	}
+});
+
+router.get('/message', auth, async (req, res) => {
+	try {
+		const messages = await Message.findAll({
+			where: {
+				UserEmail: req.userProfile.email,
+			},
+		});
+
+		res.json(messages);
+	} catch (error) {
+		console.log(error);
+		res.status(500).send(error.message);
 	}
 });
 
