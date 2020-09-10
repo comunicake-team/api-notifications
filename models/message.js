@@ -20,6 +20,11 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.UUID,
 				defaultValue: DataTypes.UUIDV4,
 			},
+			publicId: {
+				allowNull: false,
+				type: DataTypes.UUID,
+				defaultValue: DataTypes.UUIDV4,
+			},
 			phoneNumber: {
 				type: DataTypes.STRING(20),
 				allowNull: false,

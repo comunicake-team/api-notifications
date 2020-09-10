@@ -8,6 +8,11 @@ module.exports = {
 				type: Sequelize.UUID,
 				defaultValue: Sequelize.UUIDV4,
 			},
+			publicId: {
+				allowNull: false,
+				type: Sequelize.UUID,
+				defaultValue: Sequelize.UUIDV4,
+			},
 			UserEmail: {
 				type: Sequelize.STRING,
 				references: {

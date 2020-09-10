@@ -27,7 +27,8 @@
     "pg-hstore": "^2.3.3",
     "sequelize": "^6.3.5",
     "sequelize-cli": "^6.2.0",
-    "twilio": "^3.49.1"
+    "twilio": "^3.49.1",
+    "uuid": "^8.3.0"
   },
   "devDependencies": {}
 }
