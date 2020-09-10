@@ -33,7 +33,7 @@ router.delete('/message/:id', auth, async (req, res) => {
 	}
 });
 
-router.post('/message/:publicId/send', async (req, res) => {
+router.get('/message/:publicId/send', async (req, res) => {
 	try {
 		const [message] = await Message.findAll({
 			where: {
@@ -43,7 +43,7 @@ router.post('/message/:publicId/send', async (req, res) => {
 
 		if (message) {
 			console.log(
-				`Message "${req.body.text || message.defaultText}" sent to ${
+				`Message "${req.query.text || message.defaultText}" sent to ${
 					message.phoneNumber
 				}`
 			);
