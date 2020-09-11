@@ -12,6 +12,7 @@ const client = require('twilio')(
 );
 
 const auth = require('../middleware/auth');
+const rateLimiter = require('../middleware/rate-limiter');
 
 router.delete('/message/:id', auth, async (req, res) => {
 	try {
@@ -33,7 +34,7 @@ router.delete('/message/:id', auth, async (req, res) => {
 	}
 });
 
-router.get('/message/:publicId/send', async (req, res) => {
+router.get('/message/:publicId/send', rateLimiter, async (req, res) => {
 	try {
 		const [message] = await Message.findAll({
 			where: {
