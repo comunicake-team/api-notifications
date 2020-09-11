@@ -14,20 +14,38 @@ const client = require('twilio')(
 const auth = require('../middleware/auth');
 const rateLimiter = require('../middleware/rate-limiter');
 
-router.delete('/message/:id', auth, async (req, res) => {
+router.get('/message', auth, async (req, res) => {
 	try {
-		const id = req.params.id;
-
-		const message = await Message.findByPk(id, {
-			where: { UserEmail: req.userProfile.email },
+		const messages = await Message.findAll({
+			attributes: ['id', 'publicId', 'phoneNumber', 'defaultText'],
+			where: {
+				UserEmail: req.userProfile.email,
+			},
+			order: [['createdAt', 'DESC']],
 		});
 
-		if (message) {
-			await message.destroy();
-		} else {
-			throw new Error('Message Not Found');
+		res.json(messages);
+	} catch (error) {
+		console.log(error);
+		res.status(500).send(error.message);
+	}
+});
+
+router.get('/user', auth, async (req, res) => {
+	try {
+		const { email } = req.userProfile;
+
+		let user = await User.findByPk(email, {
+			attributes: ['email', 'messagesRemaining'],
+		});
+
+		if (!user) {
+			user = await User.create({
+				email: email,
+			});
 		}
-		res.status(200).json(message);
+
+		res.json(user);
 	} catch (error) {
 		console.log(error);
 		res.status(500).send(error.message);
@@ -40,23 +58,39 @@ router.get('/message/:publicId/send', rateLimiter, async (req, res) => {
 			where: {
 				publicId: req.params.publicId,
 			},
+			include: [
+				{
+					model: User,
+				},
+			],
 		});
 
-		if (message) {
-			console.log(
-				`Message "${req.query.text || message.defaultText}" sent to ${
-					message.phoneNumber
-				}`
-			);
-			// await client.messages.create({
-			//   body: "Hey Dan",
-			//   from: "+12029533907",
-			//   to: "+15415137352",
-			// });
-			res.send('Message sent');
-		} else {
+		if (!message) {
 			throw new Error('Message Not Found');
 		}
+
+		const user = message.User;
+
+		if (user.messagesRemaining <= 0) {
+			throw new Error('Message Limit Reached');
+		}
+
+		console.log(
+			`Message "${req.query.text || message.defaultText}" sent to ${
+				message.phoneNumber
+			}`
+		);
+
+		await client.messages.create({
+			body: req.query.text || message.defaultText,
+			from: '+13125868884',
+			to: message.phoneNumber,
+		});
+
+		user.messagesRemaining--;
+		await user.save();
+
+		res.status(200).send('Message sent');
 	} catch (error) {
 		console.log(error);
 		res.status(500).send(error.message);
@@ -128,17 +162,21 @@ router.put('/message/:id/change-publicId', auth, async (req, res) => {
 	}
 });
 
-router.get('/message', auth, async (req, res) => {
+router.delete('/message/:id', auth, async (req, res) => {
 	try {
-		const messages = await Message.findAll({
-			attributes: ['id', 'publicId', 'phoneNumber', 'defaultText'],
-			where: {
-				UserEmail: req.userProfile.email,
-			},
-			order: [['createdAt', 'DESC']],
+		const id = req.params.id;
+
+		const message = await Message.findByPk(id, {
+			where: { UserEmail: req.userProfile.email },
 		});
 
-		res.json(messages);
+		if (message) {
+			await message.destroy();
+		} else {
+			throw new Error('Message Not Found');
+		}
+
+		res.status(200).json(message);
 	} catch (error) {
 		console.log(error);
 		res.status(500).send(error.message);

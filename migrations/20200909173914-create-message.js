@@ -26,6 +26,7 @@ module.exports = {
 				type: Sequelize.STRING(20),
 				allowNull: false,
 			},
+
 			defaultText: {
 				type: Sequelize.STRING(250),
 			},

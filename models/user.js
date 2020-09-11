@@ -18,6 +18,11 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.STRING,
 				primaryKey: true,
 			},
+			messagesRemaining: {
+				type: DataTypes.INTEGER,
+				allowNull: false,
+				defaultValue: 100,
+			},
 		},
 		{
 			sequelize,
