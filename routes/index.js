@@ -14,7 +14,7 @@ const client = require('twilio')(
 const auth = require('../middleware/auth');
 const rateLimiter = require('../middleware/rate-limiter');
 
-router.get('/message', auth, async (req, res) => {
+router.get('/message', auth, async (req, res, next) => {
 	try {
 		const messages = await Message.findAll({
 			attributes: ['id', 'publicId', 'phoneNumber', 'defaultText'],
@@ -26,12 +26,11 @@ router.get('/message', auth, async (req, res) => {
 
 		res.json(messages);
 	} catch (error) {
-		console.log(error);
-		res.status(500).send(error.message);
+		next(error);
 	}
 });
 
-router.get('/user', auth, async (req, res) => {
+router.get('/user', auth, async (req, res, next) => {
 	try {
 		const { email } = req.userProfile;
 
@@ -47,12 +46,11 @@ router.get('/user', auth, async (req, res) => {
 
 		res.json(user);
 	} catch (error) {
-		console.log(error);
-		res.status(500).send(error.message);
+		next(error);
 	}
 });
 
-router.get('/message/:publicId/send', rateLimiter, async (req, res) => {
+router.get('/message/:publicId/send', rateLimiter, async (req, res, next) => {
 	try {
 		const [message] = await Message.findAll({
 			where: {
@@ -92,12 +90,11 @@ router.get('/message/:publicId/send', rateLimiter, async (req, res) => {
 
 		res.status(200).send('Message sent');
 	} catch (error) {
-		console.log(error);
-		res.status(500).send(error.message);
+		next(error);
 	}
 });
 
-router.post('/message', auth, async (req, res) => {
+router.post('/message', auth, async (req, res, next) => {
 	try {
 		const { phoneNumber, defaultText } = req.body;
 
@@ -109,12 +106,11 @@ router.post('/message', auth, async (req, res) => {
 
 		res.status(201).json(createdMessage);
 	} catch (error) {
-		console.log(error);
-		res.status(500).send(error.message);
+		next(error);
 	}
 });
 
-router.put('/message/:id', auth, async (req, res) => {
+router.put('/message/:id', auth, async (req, res, next) => {
 	try {
 		const { phoneNumber, defaultText } = req.body;
 		const [_, updatedMessage] = await Message.update(
@@ -134,12 +130,11 @@ router.put('/message/:id', auth, async (req, res) => {
 
 		res.status(200).json(updatedMessage);
 	} catch (error) {
-		console.log(error);
-		res.status(500).send(error.message);
+		next(error);
 	}
 });
 
-router.put('/message/:id/change-publicId', auth, async (req, res) => {
+router.put('/message/:id/change-publicId', auth, async (req, res, next) => {
 	try {
 		const [_, updatedMessage] = await Message.update(
 			{
@@ -157,12 +152,11 @@ router.put('/message/:id/change-publicId', auth, async (req, res) => {
 
 		res.status(200).json(updatedMessage);
 	} catch (error) {
-		console.log(error);
-		res.status(500).send(error.message);
+		next(error);
 	}
 });
 
-router.delete('/message/:id', auth, async (req, res) => {
+router.delete('/message/:id', auth, async (req, res, next) => {
 	try {
 		const id = req.params.id;
 
@@ -178,8 +172,7 @@ router.delete('/message/:id', auth, async (req, res) => {
 
 		res.status(200).json(message);
 	} catch (error) {
-		console.log(error);
-		res.status(500).send(error.message);
+		next(error);
 	}
 });
 

@@ -19,6 +19,7 @@ module.exports = {
 					model: 'Users',
 					key: 'email',
 				},
+				allowNull: false,
 				onUpdate: 'CASCADE',
 				onDelete: 'CASCADE',
 			},
