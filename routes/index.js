@@ -81,7 +81,7 @@ router.get('/message/:publicId/send', rateLimiter, async (req, res, next) => {
 
 		await client.messages.create({
 			body: req.query.text || message.defaultText,
-			from: '+13125868884',
+			from: process.env.TWILIO_PHONE,
 			to: message.phoneNumber,
 		});
 
