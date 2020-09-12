@@ -6,13 +6,9 @@ const {
 	models: { User, Message },
 } = sequelize;
 
-const client = require('twilio')(
-	process.env.TWILIO_ACCOUNT_SID,
-	process.env.TWILIO_AUTH_TOKEN
-);
-
 const auth = require('../middleware/auth');
 const rateLimiter = require('../middleware/rate-limiter');
+const { sendMessage } = require('./lib');
 
 router.get('/message', auth, async (req, res, next) => {
 	try {
@@ -50,49 +46,9 @@ router.get('/user', auth, async (req, res, next) => {
 	}
 });
 
-router.get('/message/:publicId/send', rateLimiter, async (req, res, next) => {
-	try {
-		const [message] = await Message.findAll({
-			where: {
-				publicId: req.params.publicId,
-			},
-			include: [
-				{
-					model: User,
-				},
-			],
-		});
+router.get('/message/:publicId/send', rateLimiter, sendMessage);
 
-		if (!message) {
-			throw new Error('Message Not Found');
-		}
-
-		const user = message.User;
-
-		if (user.messagesRemaining <= 0) {
-			throw new Error('Message Limit Reached');
-		}
-
-		console.log(
-			`Message "${req.query.text || message.defaultText}" sent to ${
-				message.phoneNumber
-			}`
-		);
-
-		await client.messages.create({
-			body: req.query.text || message.defaultText,
-			from: process.env.TWILIO_PHONE,
-			to: message.phoneNumber,
-		});
-
-		user.messagesRemaining--;
-		await user.save();
-
-		res.status(200).send('Message sent');
-	} catch (error) {
-		next(error);
-	}
-});
+router.post('/message/:publicId/send', rateLimiter, sendMessage);
 
 router.post('/message', auth, async (req, res, next) => {
 	try {
