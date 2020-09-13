@@ -1,5 +1,5 @@
 if (process.env.NODE_ENV == 'production') {
-	require("newrelic");
+	require('newrelic');
 }
 
 const createError = require('http-errors');
@@ -35,7 +35,7 @@ app.use(function (err, req, res, next) {
 
 	// render the error page
 	res.status(err.status || 500);
-	res.json({ message: err.message });
+	res.send(err.message);
 });
 
 module.exports = app;

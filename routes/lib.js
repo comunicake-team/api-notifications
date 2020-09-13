@@ -42,7 +42,9 @@ async function sendMessage(req, res, next) {
 		user.messagesRemaining--;
 		await user.save();
 
-		res.status(200).send('Message sent');
+		res.status(200).send(
+			'Message sent! If you liked our service, check us out at comunicake.com'
+		);
 	} catch (error) {
 		next(error);
 	}
