@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
+const axios = require('axios');
 const { sequelize } = require('../models');
 const {
 	models: { User, Message },
@@ -38,6 +39,14 @@ router.get('/user', auth, async (req, res, next) => {
 			user = await User.create({
 				email: email,
 			});
+
+			if (process.env.NEW_USER_WEBHOOK) {
+				axios.post(process.env.NEW_USER_WEBHOOK, null, {
+					params: {
+						text: `New user ${email} has signed up!`,
+					},
+				});
+			}
 		}
 
 		res.json(user);

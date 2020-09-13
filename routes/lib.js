@@ -33,12 +33,6 @@ async function sendMessage(req, res, next) {
 			throw new Error('Message Limit Reached');
 		}
 
-		console.log(
-			`Message "${req.query.text || message.defaultText}" sent to ${
-				message.phoneNumber
-			}`
-		);
-
 		await client.messages.create({
 			body: req.query.text || message.defaultText,
 			from: process.env.TWILIO_PHONE,
