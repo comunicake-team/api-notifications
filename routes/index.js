@@ -1,3 +1,4 @@
+const newrelic = require('newrelic');
 const express = require('express');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
@@ -39,6 +40,13 @@ router.get('/user', auth, async (req, res, next) => {
 			user = await User.create({
 				email: email,
 			});
+
+			try {
+				const totalUsers = await user.count();
+				newrelic.recordMetric('Users/total', totalUsers);
+			} catch (error) {
+				next(error);
+			}
 
 			if (process.env.NEW_USER_WEBHOOK) {
 				axios.post(process.env.NEW_USER_WEBHOOK, null, {
