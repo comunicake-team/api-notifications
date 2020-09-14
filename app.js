@@ -1,6 +1,6 @@
-if (process.env.NODE_ENV == 'production') {
-	require('newrelic');
-}
+//if (process.env.NODE_ENV == 'production') {
+//	require('newrelic');
+//}
 
 const createError = require('http-errors');
 const express = require('express');
